@@ -14,5 +14,18 @@ CHIP PC {
     OUT out[16];
     
     PARTS:
-    //// Replace this comment with your code.
+    Inc16(in=regout, out=ininc);
+    // Calculate possible value to load
+    Mux16(a=false, b=ininc, sel=inc, out=maybeinc);
+    Mux16(a=maybeinc, b=in, sel=load, out=maybeload );
+    Mux16(a=maybeload, b=false, sel=reset, out=toload);
+
+    // If at least a flag is set, we want to load
+    Or(a=reset, b=load, out=resetorload);
+    Or(a=resetorload, b=inc, out=shouldload);
+
+    Register(in=toload, load=shouldload, out=regout);
+
+    // Hack to use feedback
+    Or16(a=regout, b=regout, out=out);
 }
